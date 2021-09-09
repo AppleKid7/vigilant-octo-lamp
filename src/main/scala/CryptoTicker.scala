@@ -1,7 +1,5 @@
 package com.example.ticker
 
-import boopickle.Default._
-import scala.util.{Failure, Success, Try}
 import yahoofinance.YahooFinance
 import zhttp.http._
 import zhttp.service.Server
@@ -16,7 +14,7 @@ import java.io.IOException
 
 object CryptoTicker extends App {
 
-  def ticketURLCall(symbol: String): UIO[java.math.BigDecimal] = ZIO.succeed {
+  def ticketURLCall(symbol: String): Task[java.math.BigDecimal] = ZIO.effect {
     YahooFinance.get(symbol).getQuote(true).getPrice
   }
 
@@ -26,7 +24,7 @@ object CryptoTicker extends App {
 
   def stringMsg(symbol: String, price: java.math.BigDecimal) = WebSocketFrame.text(s"$symbol: $price")
 
-  private val socket: Socket[Has[Console.Service] & Has[Clock.Service], IOException, WebSocketFrame, WebSocketFrame] = 
+  private val socket: Socket[Has[Console.Service] & Has[Clock.Service], Throwable, WebSocketFrame, WebSocketFrame] = 
     Socket.collect[WebSocketFrame] {
       case WebSocketFrame.Text(symbol)  =>
         ZStream
